@@ -1,0 +1,12 @@
+# DS4 Linux: let the logged-in user change the DualShock 4 lightbar.
+#
+# The kernel exposes the lightbar as LEDs that only root can write. This rule
+# makes the red, green and blue brightness files writable for everyone on the
+# machine, which only allows changing the lightbar color.
+#
+# The LED is matched through its HID parent: Sony vendor ID 054C and the
+# DualShock 4 product IDs (05C4 and 09CC), on USB (0003) and Bluetooth (0005).
+ACTION=="add|change", SUBSYSTEM=="leds", SUBSYSTEMS=="hid", \
+  KERNELS=="000[35]:054C:05C4.*|000[35]:054C:09CC.*", \
+  KERNEL=="*:red|*:green|*:blue", \
+  RUN+="/bin/chmod 0666 /sys%p/brightness"
