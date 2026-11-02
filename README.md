@@ -2,7 +2,7 @@
 
 A graphical app to configure the **DualShock 4** controller on Linux, inspired by DS4Windows.
 
-> **Status: pre-alpha.** For now the repository only contains the initial project structure. No feature is implemented yet.
+> **Status: pre-alpha.** Controller discovery and battery reading work from the command line. There is no graphical interface yet, and the lightbar cannot be changed yet.
 
 ## Planned features
 
@@ -27,6 +27,16 @@ The interface will be written in Python with GTK4 and libadwaita.
 - Linux with the `hid_playstation` driver (recent kernel).
 - Python 3.10 or newer.
 - PyGObject, GTK4 and libadwaita. On Debian, Ubuntu and derivatives: `python3-gi`, `gir1.2-gtk-4.0` and `gir1.2-adw-1`.
+
+## Usage
+
+List the connected controllers, on any USB port or over Bluetooth:
+
+```bash
+PYTHONPATH=src python3 -m ds4linux list
+```
+
+Add `--json` for machine-readable output.
 
 ## Development
 

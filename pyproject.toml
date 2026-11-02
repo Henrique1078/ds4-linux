@@ -20,5 +20,8 @@ classifiers = [
 # listed here.
 dependencies = []
 
+[project.scripts]
+ds4-linux = "ds4linux.cli:main"
+
 [tool.setuptools.packages.find]
 where = ["src"]
