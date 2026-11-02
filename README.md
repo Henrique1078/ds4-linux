@@ -2,7 +2,7 @@
 
 A graphical app to configure the **DualShock 4** controller on Linux, inspired by DS4Windows.
 
-> **Status: pre-alpha.** Controller discovery and battery reading work from the command line. There is no graphical interface yet, and the lightbar cannot be changed yet.
+> **Status: pre-alpha.** A graphical interface can change the lightbar color, turn it on and off, and show the battery level. Everything else (charging mode, remapping, macros) is still planned.
 
 ## Planned features
 
@@ -30,7 +30,36 @@ The interface will be written in Python with GTK4 and libadwaita.
 
 ## Usage
 
-List the connected controllers, on any USB port or over Bluetooth:
+### Allow lightbar control (once)
+
+The kernel only lets root change the lightbar. Install the udev rule from this repository so your user can change it, then reconnect the controller:
+
+```bash
+sudo install -m 644 data/70-ds4-linux.rules /etc/udev/rules.d/
+sudo udevadm control --reload-rules
+sudo udevadm trigger --subsystem-match=leds --action=add
+```
+
+The rule only makes the red, green and blue brightness files of DualShock 4 LEDs writable by every user on the machine, so anyone logged in can change the lightbar color. It matches Sony's vendor ID with the DualShock 4 product IDs, so controllers from other vendors are not covered yet.
+
+### Open the app
+
+```bash
+PYTHONPATH=src python3 -m ds4linux
+```
+
+The app shows every connected controller, whichever USB port or Bluetooth link it uses. The color and on/off state are remembered per controller in `~/.config/ds4-linux/config.json` and are applied again when the controller reconnects while the app is open.
+
+### About "off"
+
+The lightbar switch does not send pure black. While a DualShock 4 is charging over USB, its firmware takes over a black lightbar and pulses orange (the charging animation). Turning the light off sets each channel to 1 instead, which does not trigger the animation.
+
+- **Original Sony DualShock 4 (v2):** the light goes completely dark.
+- **Third-party controllers:** some cannot be fully turned off while charging over USB. The lowest non-zero step of their LED is still visible, so a faint light stays on. Pure black is not an option either, because their firmware also shows the orange charging animation. This was seen on a DataFrog controller; there is no color that works around it.
+
+Other models and Bluetooth have not been tested.
+
+### List controllers
 
 ```bash
 PYTHONPATH=src python3 -m ds4linux list

@@ -56,9 +56,20 @@ def _list(args: argparse.Namespace) -> int:
     return 0
 
 
+def _gui(_args: argparse.Namespace) -> int:
+    try:
+        from ds4linux.ui.app import run
+    except (ImportError, ValueError) as error:
+        print(f"The graphical interface needs GTK4 and libadwaita: {error}", file=sys.stderr)
+        return 1
+    return run([sys.argv[0]])
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="ds4-linux")
-    commands = parser.add_subparsers(dest="command", required=True)
+    parser.set_defaults(handler=_gui)
+    commands = parser.add_subparsers(dest="command")
+    commands.add_parser("gui", help="open the graphical interface (default)").set_defaults(handler=_gui)
     list_command = commands.add_parser("list", help="list connected DualShock 4 controllers")
     list_command.add_argument("--json", action="store_true", help="print machine-readable output")
     list_command.set_defaults(handler=_list)
