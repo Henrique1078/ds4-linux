@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from gi.repository import Adw, GLib, Gtk
+from gi.repository import Adw, Gio, GLib, Gtk
 
 from ds4linux.battery import read_battery
+from ds4linux.charge import ChargeTracker
 from ds4linux.config import Config, LightbarSettings
 from ds4linux.device import Controller, find_controllers
 from ds4linux.lightbar import OFF, Color, avoid_black, can_write, set_color
@@ -35,6 +36,7 @@ class MainWindow(Adw.ApplicationWindow):
         super().__init__(application=application, title="DS4 Linux")
         self.set_default_size(440, 840)
         self._config = config or Config()
+        self._charge = ChargeTracker()
         self._controllers: dict[str, Controller] = {}
         self._keys: list[str] = []
         self._selected: str | None = None
@@ -106,7 +108,8 @@ class MainWindow(Adw.ApplicationWindow):
         self._stack = Gtk.Stack()
         self._stack.add_named(self._empty, "empty")
         self._stack.add_named(scrolled, "controller")
-        toolbar = Adw.ToolbarView(content=self._stack)
+        self._toasts = Adw.ToastOverlay(child=self._stack)
+        toolbar = Adw.ToolbarView(content=self._toasts)
         toolbar.add_top_bar(Adw.HeaderBar())
         self.set_content(toolbar)
 
@@ -119,7 +122,10 @@ class MainWindow(Adw.ApplicationWindow):
     def _refresh(self) -> None:
         found = {_key(controller): controller for controller in find_controllers()}
         newly_connected = [key for key in found if key not in self._controllers]
+        for key in self._controllers.keys() - found.keys():
+            self._charge.forget(key)
         self._controllers = found
+        self._check_charging()
         keys = list(found)
         if keys != self._keys:
             self._keys = keys
@@ -136,6 +142,24 @@ class MainWindow(Adw.ApplicationWindow):
         for key in newly_connected:
             self._apply_saved(found[key], self._config.lightbar(key))
         self._update_view()
+
+    def _check_charging(self) -> None:
+        """Tell the user when any connected controller finishes charging."""
+        for key, controller in self._controllers.items():
+            battery = read_battery(controller.battery_path) if controller.battery_path else None
+            if self._charge.update(key, battery):
+                self._notify_charged(key, controller)
+
+    def _notify_charged(self, key: str, controller: Controller) -> None:
+        message = f"{_label(controller)} is fully charged."
+        self._toasts.add_toast(Adw.Toast(title=message))
+        if self.is_active():
+            return
+        # The window is in the background, so also use a desktop notification.
+        notification = Gio.Notification.new("Controller charged")
+        notification.set_body(message)
+        notification.set_icon(Gio.ThemedIcon.new("battery-full-charged-symbolic"))
+        self.get_application().send_notification(f"charged-{key}", notification)
 
     def _apply_saved(self, controller: Controller, settings: LightbarSettings) -> None:
         if controller.lightbar is None:

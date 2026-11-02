@@ -2,7 +2,7 @@
 
 A graphical app to configure the **DualShock 4** controller on Linux, inspired by DS4Windows.
 
-> **Status: pre-alpha.** A graphical interface can change the lightbar color, turn it on and off, and show the battery level. Everything else (charging mode, remapping, macros) is still planned.
+> **Status: pre-alpha.** A graphical interface can change the lightbar color, turn it on and off, show the battery level and tell you when charging finishes. Everything else (charging mode, remapping, macros) is still planned.
 
 ## Planned features
 
@@ -11,7 +11,7 @@ First milestone:
 - Detect the controller over USB and Bluetooth, with automatic reconnection.
 - Change the lightbar color with a color wheel.
 - Turn the lightbar off and restore the color afterwards.
-- Show the battery level and charging state.
+- Show the battery level and charging state, and tell you when a controller finishes charging.
 - Remember the last color and reapply it when the controller reconnects.
 
 Later milestones: charging mode (controller powered but not configured by the PC, like the PS4 rest mode), button remapping, macros and profiles.
