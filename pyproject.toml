@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ds4-linux"
+version = "0.1.0.dev0"
+description = "DualShock 4 configuration on Linux: lightbar, battery and, later, remapping and macros"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "GPL-3.0-or-later" }
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+]
+# PyGObject (GTK4 and libadwaita) comes from the system (python3-gi,
+# gir1.2-gtk-4.0, gir1.2-adw-1) and is not installed by pip, so it is not
+# listed here.
+dependencies = []
+
+[tool.setuptools.packages.find]
+where = ["src"]
